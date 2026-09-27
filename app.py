@@ -40,10 +40,10 @@ groq = Groq(api_key=GROQ_API_KEY)
 
 async def review_with_hindsight(code_to_review):
     """
-    Run all Hindsight operations inside one event loop.
+    Recall relevant previous lessons, review new code with AI,
+    and store the new review in Hindsight.
     """
 
-    # Create Hindsight client inside this async operation
     hindsight = Hindsight(
         base_url=HINDSIGHT_API_URL,
         api_key=HINDSIGHT_API_KEY
@@ -51,49 +51,82 @@ async def review_with_hindsight(code_to_review):
 
     try:
 
-        # Recall previous lessons
+        # -----------------------------------------
+        # 1. RECALL CODE-SPECIFIC MEMORY
+        # -----------------------------------------
+
         memory_result = await hindsight.arecall(
             bank_id=BANK_ID,
-            query=(
-                "Find previous code review lessons, recurring mistakes, "
-                "coding preferences, and feedback that could help review "
-                "this new Python code."
-            )
+            query=f"""
+Find previous CodeMemory lessons that are relevant to reviewing
+the following Python code.
+
+Look especially for:
+- similar bugs
+- similar functions
+- previous mistakes
+- coding preferences
+- previous review feedback
+- lessons that could improve this review
+
+New Python code:
+
+{code_to_review}
+"""
         )
 
-        # Convert memories into text
-        memories = [
-            memory.text
-            for memory in memory_result.results
-        ]
+        # -----------------------------------------
+        # REMOVE EXACT DUPLICATES
+        # -----------------------------------------
+
+        unique_memories = []
+
+        for memory in memory_result.results:
+
+            memory_text = memory.text.strip()
+
+            if memory_text and memory_text not in unique_memories:
+                unique_memories.append(memory_text)
+
+            if len(unique_memories) == 5:
+                break
+
+        memories = unique_memories
 
         memory_context = "\n".join(
-            f"- {memory.text}"
-            for memory in memory_result.results
+            f"- {memory}"
+            for memory in memories
         )
 
-        # Ask Groq for the review
+        # -----------------------------------------
+        # 2. ASK GROQ TO REVIEW THE CODE
+        # -----------------------------------------
+
         prompt = f"""
 You are CodeMemory, an AI code review agent that learns from previous reviews.
 
 Your most important job is to use relevant lessons from previous reviews
 when reviewing new code.
 
-Previous CodeMemory lessons:
+Previous CodeMemory lessons retrieved from Hindsight:
+
 {memory_context}
 
 New Python code:
+
 {code_to_review}
 
 Review the new code.
 
 IMPORTANT:
 - Use previous lessons when they are relevant.
-- If a previous lesson applies to this code, explicitly mention:
-  "CodeMemory remembered: ..."
+- Only mention memories that actually relate to the new code.
 - Do not invent previous lessons.
+- If a previous lesson applies, explicitly say:
+  "CodeMemory remembered: ..."
 - Identify bugs and risks.
 - Give beginner-friendly explanations.
+- Explain why each important issue matters.
 
 Use these sections:
 
@@ -103,8 +136,8 @@ Use these sections:
 4. IMPROVED CODE
 5. MEMORY LESSON
 
-In MEMORY LESSON, give one short lesson that CodeMemory should remember
-for future code reviews.
+In MEMORY LESSON, give one short and useful lesson that CodeMemory
+should remember for future code reviews.
 """
 
         response = groq.chat.completions.create(
@@ -120,7 +153,10 @@ for future code reviews.
 
         review = response.choices[0].message.content
 
-        # Store the new review in Hindsight
+        # -----------------------------------------
+        # 3. STORE NEW MEMORY
+        # -----------------------------------------
+
         await hindsight.aretain(
             bank_id=BANK_ID,
             content=f"""
@@ -134,11 +170,14 @@ Review:
 """
         )
 
+        # -----------------------------------------
+        # 4. RETURN RESULTS
+        # -----------------------------------------
+
         return review, memories
 
     finally:
 
-        # Close Hindsight inside the same event loop
         await hindsight.aclose()
 
 
@@ -154,7 +193,6 @@ def home():
 
         if code_to_review:
 
-            # Run Hindsight operations in one controlled event loop
             review, memories = asyncio.run(
                 review_with_hindsight(code_to_review)
             )
@@ -162,7 +200,8 @@ def home():
     return render_template(
         "index.html",
         review=review,
-        memories=memories
+        memories=memories,
+        memory_count=len(memories)
     )
 
 

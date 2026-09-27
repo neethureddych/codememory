@@ -107,12 +107,39 @@
             font-size: 16px;
             font-weight: bold;
             cursor: pointer;
-            transition: 0.2s;
         }
 
         button:hover {
             background: #3b82f6;
-            transform: translateY(-1px);
+        }
+
+        /* EXAMPLES */
+
+        .examples {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 18px;
+        }
+
+        .example-button {
+            margin-top: 0;
+            padding: 10px 15px;
+            background: #172554;
+            border: 1px solid #2563eb;
+            color: #bfdbfe;
+            font-size: 14px;
+        }
+
+        .example-button:hover {
+            background: #1e3a8a;
+        }
+
+        .example-label {
+            color: #9ca3af;
+            font-size: 14px;
+            margin-top: 20px;
+            margin-bottom: 8px;
         }
 
         .flow {
@@ -147,31 +174,62 @@
             line-height: 1.5;
         }
 
+        /* MEMORY */
+
+        .memory-card {
+            background: linear-gradient(135deg, #0f172a, #111d3a);
+            border: 1px solid #2563eb;
+        }
+
+        .memory-title {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .memory-title h2 {
+            margin-bottom: 0;
+        }
+
+        .memory-count {
+            padding: 6px 12px;
+            border-radius: 20px;
+            background: #1e3a8a;
+            color: #bfdbfe;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
         .memory-box {
-            background: #0f172a;
+            background: #020617;
             border: 1px solid #1d4ed8;
             border-left: 5px solid #3b82f6;
-            padding: 17px;
+            padding: 18px;
             border-radius: 10px;
-            margin-bottom: 12px;
-            line-height: 1.6;
+            margin-top: 14px;
+            line-height: 1.7;
             color: #dbeafe;
         }
 
         .memory-label {
+            display: block;
             color: #60a5fa;
             font-weight: bold;
+            margin-bottom: 7px;
         }
 
-        .memory-count {
-            display: inline-block;
-            margin-left: 8px;
-            padding: 4px 9px;
-            border-radius: 12px;
-            background: #1e3a8a;
+        .memory-explanation {
+            margin-top: 18px;
+            padding: 15px;
+            border-radius: 10px;
+            background: #172554;
             color: #bfdbfe;
-            font-size: 12px;
+            line-height: 1.6;
         }
+
+        /* REVIEW */
 
         .review {
             white-space: pre-wrap;
@@ -183,6 +241,8 @@
             overflow-x: auto;
             color: #d1d5db;
         }
+
+        /* LEARNING */
 
         .learning {
             background: #052e1b;
@@ -212,11 +272,6 @@
             color: #6ee7b7;
             font-size: 13px;
             font-weight: bold;
-        }
-
-        .empty {
-            color: #9ca3af;
-            line-height: 1.7;
         }
 
         .footer {
@@ -280,9 +335,39 @@
                 those lessons, and stores the new learning for future reviews.
             </p>
 
+            <div class="example-label">
+                ⚡ Try a ready-made example:
+            </div>
+
+            <div class="examples">
+
+                <button
+                    type="button"
+                    class="example-button"
+                    onclick="loadExample('division')">
+                    🐛 Buggy Division
+                </button>
+
+                <button
+                    type="button"
+                    class="example-button"
+                    onclick="loadExample('data')">
+                    📊 Bad Data Processing
+                </button>
+
+                <button
+                    type="button"
+                    class="example-button"
+                    onclick="loadExample('clean')">
+                    ✅ Clean Example
+                </button>
+
+            </div>
+
             <form method="POST">
 
                 <textarea
+                    id="codeInput"
                     name="code"
                     placeholder="Paste your Python code here..."
                     required
@@ -306,62 +391,34 @@
             <h2>⚡ How CodeMemory Learns</h2>
 
             <p class="description">
-                Unlike a normal code reviewer, CodeMemory keeps useful
-                lessons from previous reviews and uses them when reviewing
-                new code.
+                CodeMemory keeps useful lessons from previous reviews
+                and uses them when reviewing new code.
             </p>
 
             <div class="flow">
 
                 <div class="flow-item">
-
                     <div class="flow-number">💻</div>
-
                     <strong>1. Submit</strong>
-
-                    <span>
-                        Submit your Python code.
-                    </span>
-
+                    <span>Submit your Python code.</span>
                 </div>
 
-
                 <div class="flow-item">
-
                     <div class="flow-number">🧠</div>
-
                     <strong>2. Recall</strong>
-
-                    <span>
-                        Hindsight retrieves relevant past lessons.
-                    </span>
-
+                    <span>Hindsight retrieves relevant past lessons.</span>
                 </div>
 
-
                 <div class="flow-item">
-
                     <div class="flow-number">🤖</div>
-
                     <strong>3. Review</strong>
-
-                    <span>
-                        Groq reviews your code using those lessons.
-                    </span>
-
+                    <span>Groq reviews your code using those lessons.</span>
                 </div>
 
-
                 <div class="flow-item">
-
                     <div class="flow-number">📚</div>
-
                     <strong>4. Learn</strong>
-
-                    <span>
-                        The new lesson is stored in Hindsight.
-                    </span>
-
+                    <span>The new lesson is stored in Hindsight.</span>
                 </div>
 
             </div>
@@ -375,19 +432,21 @@
 
         {% if memories %}
 
-        <div class="card">
+        <div class="card memory-card">
 
-            <h2>
-                🧠 Memory Recalled
+            <div class="memory-title">
 
-                <span class="memory-count">
-                    {{ memories|length }} memories
-                </span>
-            </h2>
+                <h2>🧠 What CodeMemory Remembered</h2>
+
+                <div class="memory-count">
+                    {{ memory_count }} memories recalled
+                </div>
+
+            </div>
 
             <p class="description">
-                These lessons were retrieved from Hindsight before the AI
-                reviewed your new code.
+                Before reviewing your code, CodeMemory searched Hindsight
+                for lessons from previous code reviews.
             </p>
 
 
@@ -396,7 +455,7 @@
             <div class="memory-box">
 
                 <span class="memory-label">
-                    CodeMemory remembered:
+                    🧠 Retrieved lesson
                 </span>
 
                 {{ memory }}
@@ -404,6 +463,16 @@
             </div>
 
             {% endfor %}
+
+
+            <div class="memory-explanation">
+
+                💡 <strong>Why this matters:</strong>
+                These memories are not hard-coded into the application.
+                They were retrieved from CodeMemory's persistent Hindsight
+                memory and supplied to the AI during this review.
+
+            </div>
 
         </div>
 
@@ -423,7 +492,7 @@
         </div>
 
 
-        <!-- LEARNING RESULT -->
+        <!-- NEW MEMORY -->
 
         <div class="card learning">
 
@@ -464,6 +533,48 @@
         CodeMemory • AI Code Review • Hindsight Persistent Memory
 
     </div>
+
+
+    <script>
+
+        function loadExample(example) {
+
+            const codeInput = document.getElementById("codeInput");
+
+            const examples = {
+
+                division: `def divide(a, b):
+    return a / b
+
+print(divide(10, 0))`,
+
+                data: `def calculate_total(numbers):
+    total = 0
+
+    for number in numbers:
+        total += number
+
+    return total
+
+print(calculate_total([10, 20, 30]))`,
+
+                clean: `def calculate_total(numbers: list[float]) -> float:
+    """Return the total of a list of numbers."""
+    return sum(numbers)
+
+
+if __name__ == "__main__":
+    print(calculate_total([10, 20, 30]))`
+
+            };
+
+            codeInput.value = examples[example];
+
+            codeInput.focus();
+
+        }
+
+    </script>
 
 </body>
 
