@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>CodeMemory — AI Code Review</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #0b1120;
+            color: #e5e7eb;
+        }
+
+        .header {
+            padding: 55px 20px 45px;
+            text-align: center;
+            background: linear-gradient(135deg, #111827, #172554);
+            border-bottom: 1px solid #1e3a5f;
+        }
+
+        .logo {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 42px;
+            color: white;
+        }
+
+        .header p {
+            margin: 12px 0 0;
+            color: #93c5fd;
+            font-size: 18px;
+        }
+
+        .badge {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 8px 15px;
+            border-radius: 20px;
+            background: #1e3a8a;
+            color: #bfdbfe;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .container {
+            width: 92%;
+            max-width: 1150px;
+            margin: 35px auto;
+        }
+
+        .card {
+            background: #111827;
+            border: 1px solid #1f2937;
+            border-radius: 16px;
+            padding: 28px;
+            margin-bottom: 24px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+        }
+
+        .card h2 {
+            margin-top: 0;
+            color: white;
+        }
+
+        .description {
+            color: #9ca3af;
+            line-height: 1.7;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 330px;
+            padding: 18px;
+            border: 1px solid #374151;
+            border-radius: 12px;
+            font-family: Consolas, monospace;
+            font-size: 15px;
+            resize: vertical;
+            background: #020617;
+            color: #e5e7eb;
+        }
+
+        textarea:focus {
+            outline: 2px solid #3b82f6;
+            border-color: #3b82f6;
+        }
+
+        button {
+            margin-top: 18px;
+            padding: 14px 28px;
+            border: none;
+            border-radius: 10px;
+            background: #2563eb;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        button:hover {
+            background: #3b82f6;
+            transform: translateY(-1px);
+        }
+
+        .flow {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 14px;
+            margin-top: 25px;
+        }
+
+        .flow-item {
+            padding: 20px;
+            text-align: center;
+            background: #0f172a;
+            border: 1px solid #1f2937;
+            border-radius: 12px;
+        }
+
+        .flow-number {
+            font-size: 25px;
+            margin-bottom: 10px;
+        }
+
+        .flow-item strong {
+            display: block;
+            color: white;
+            margin-bottom: 8px;
+        }
+
+        .flow-item span {
+            color: #9ca3af;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .memory-box {
+            background: #0f172a;
+            border: 1px solid #1d4ed8;
+            border-left: 5px solid #3b82f6;
+            padding: 17px;
+            border-radius: 10px;
+            margin-bottom: 12px;
+            line-height: 1.6;
+            color: #dbeafe;
+        }
+
+        .memory-label {
+            color: #60a5fa;
+            font-weight: bold;
+        }
+
+        .memory-count {
+            display: inline-block;
+            margin-left: 8px;
+            padding: 4px 9px;
+            border-radius: 12px;
+            background: #1e3a8a;
+            color: #bfdbfe;
+            font-size: 12px;
+        }
+
+        .review {
+            white-space: pre-wrap;
+            background: #020617;
+            padding: 22px;
+            border-radius: 12px;
+            border: 1px solid #1f2937;
+            line-height: 1.75;
+            overflow-x: auto;
+            color: #d1d5db;
+        }
+
+        .learning {
+            background: #052e1b;
+            border: 1px solid #065f46;
+        }
+
+        .learning h2 {
+            color: #6ee7b7;
+        }
+
+        .learning p {
+            color: #a7f3d0;
+            line-height: 1.7;
+        }
+
+        .status {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        .status-item {
+            padding: 8px 13px;
+            border-radius: 20px;
+            background: #064e3b;
+            color: #6ee7b7;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .empty {
+            color: #9ca3af;
+            line-height: 1.7;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 35px;
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        @media (max-width: 800px) {
+            .flow {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .header h1 {
+                font-size: 32px;
+            }
+        }
+
+        @media (max-width: 500px) {
+            .flow {
+                grid-template-columns: 1fr;
+            }
+
+            .card {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="header">
+
+        <div class="logo">🧠</div>
+
+        <h1>CodeMemory</h1>
+
+        <p>AI Code Review That Learns From Your Past Reviews</p>
+
+        <div class="badge">
+            POWERED BY HINDSIGHT + GROQ
+        </div>
+
+    </div>
+
+
+    <div class="container">
+
+
+        <!-- CODE INPUT -->
+
+        <div class="card">
+
+            <h2>🔍 Review Your Python Code</h2>
+
+            <p class="description">
+                Paste your Python code below. CodeMemory recalls lessons
+                from previous reviews, asks AI to review your code using
+                those lessons, and stores the new learning for future reviews.
+            </p>
+
+            <form method="POST">
+
+                <textarea
+                    name="code"
+                    placeholder="Paste your Python code here..."
+                    required
+                ></textarea>
+
+                <button type="submit">
+                    🚀 Review My Code
+                </button>
+
+            </form>
+
+        </div>
+
+
+        <!-- HOW IT WORKS -->
+
+        {% if not review and not memories %}
+
+        <div class="card">
+
+            <h2>⚡ How CodeMemory Learns</h2>
+
+            <p class="description">
+                Unlike a normal code reviewer, CodeMemory keeps useful
+                lessons from previous reviews and uses them when reviewing
+                new code.
+            </p>
+
+            <div class="flow">
+
+                <div class="flow-item">
+
+                    <div class="flow-number">💻</div>
+
+                    <strong>1. Submit</strong>
+
+                    <span>
+                        Submit your Python code.
+                    </span>
+
+                </div>
+
+
+                <div class="flow-item">
+
+                    <div class="flow-number">🧠</div>
+
+                    <strong>2. Recall</strong>
+
+                    <span>
+                        Hindsight retrieves relevant past lessons.
+                    </span>
+
+                </div>
+
+
+                <div class="flow-item">
+
+                    <div class="flow-number">🤖</div>
+
+                    <strong>3. Review</strong>
+
+                    <span>
+                        Groq reviews your code using those lessons.
+                    </span>
+
+                </div>
+
+
+                <div class="flow-item">
+
+                    <div class="flow-number">📚</div>
+
+                    <strong>4. Learn</strong>
+
+                    <span>
+                        The new lesson is stored in Hindsight.
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        {% endif %}
+
+
+        <!-- MEMORY -->
+
+        {% if memories %}
+
+        <div class="card">
+
+            <h2>
+                🧠 Memory Recalled
+
+                <span class="memory-count">
+                    {{ memories|length }} memories
+                </span>
+            </h2>
+
+            <p class="description">
+                These lessons were retrieved from Hindsight before the AI
+                reviewed your new code.
+            </p>
+
+
+            {% for memory in memories %}
+
+            <div class="memory-box">
+
+                <span class="memory-label">
+                    CodeMemory remembered:
+                </span>
+
+                {{ memory }}
+
+            </div>
+
+            {% endfor %}
+
+        </div>
+
+        {% endif %}
+
+
+        <!-- AI REVIEW -->
+
+        {% if review %}
+
+        <div class="card">
+
+            <h2>🤖 AI Code Review</h2>
+
+            <div class="review">{{ review }}</div>
+
+        </div>
+
+
+        <!-- LEARNING RESULT -->
+
+        <div class="card learning">
+
+            <h2>📚 New Memory Stored</h2>
+
+            <p>
+                This review has been stored in Hindsight.
+                CodeMemory can retrieve this lesson during future
+                code reviews.
+            </p>
+
+            <div class="status">
+
+                <div class="status-item">
+                    ✓ AI Review Complete
+                </div>
+
+                <div class="status-item">
+                    ✓ Memory Retrieved
+                </div>
+
+                <div class="status-item">
+                    ✓ New Lesson Stored
+                </div>
+
+            </div>
+
+        </div>
+
+        {% endif %}
+
+
+    </div>
+
+
+    <div class="footer">
+
+        CodeMemory • AI Code Review • Hindsight Persistent Memory
+
+    </div>
+
+</body>
+
+</html>
