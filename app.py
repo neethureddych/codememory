@@ -7,7 +7,6 @@ from hindsight_client import Hindsight
 from groq import Groq
 
 
-# Load variables from .env
 load_dotenv()
 
 HINDSIGHT_API_KEY = os.getenv("HINDSIGHT_API_KEY")
@@ -16,7 +15,6 @@ BANK_ID = os.getenv("HINDSIGHT_BANK_ID")
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
 
-# Check settings
 if not HINDSIGHT_API_KEY:
     raise ValueError("HINDSIGHT_API_KEY is missing from .env")
 
@@ -30,19 +28,12 @@ if not GROQ_API_KEY:
     raise ValueError("GROQ_API_KEY is missing from .env")
 
 
-# Create Flask app
 app = Flask(__name__)
 
-
-# Connect to Groq
 groq = Groq(api_key=GROQ_API_KEY)
 
 
 async def review_with_hindsight(code_to_review):
-    """
-    Recall relevant previous lessons, review new code with AI,
-    and store the new review in Hindsight.
-    """
 
     hindsight = Hindsight(
         base_url=HINDSIGHT_API_URL,
@@ -52,7 +43,7 @@ async def review_with_hindsight(code_to_review):
     try:
 
         # -----------------------------------------
-        # 1. RECALL CODE-SPECIFIC MEMORY
+        # 1. RECALL RELEVANT MEMORY
         # -----------------------------------------
 
         memory_result = await hindsight.arecall(
@@ -99,7 +90,7 @@ New Python code:
         )
 
         # -----------------------------------------
-        # 2. ASK GROQ TO REVIEW THE CODE
+        # 2. ASK GROQ TO REVIEW
         # -----------------------------------------
 
         prompt = f"""
@@ -136,7 +127,7 @@ Use these sections:
 4. IMPROVED CODE
 5. MEMORY LESSON
 
-In MEMORY LESSON, give one short and useful lesson that CodeMemory
+In MEMORY LESSON, give exactly one short and useful lesson that CodeMemory
 should remember for future code reviews.
 """
 
@@ -154,7 +145,29 @@ should remember for future code reviews.
         review = response.choices[0].message.content
 
         # -----------------------------------------
-        # 3. STORE NEW MEMORY
+        # 3. CHECK WHETHER MEMORY INFLUENCED REVIEW
+        # -----------------------------------------
+
+        memory_used = "codememory remembered" in review.lower()
+
+        # -----------------------------------------
+        # 4. EXTRACT MEMORY LESSON
+        # -----------------------------------------
+
+        new_lesson = ""
+
+        if "MEMORY LESSON" in review:
+
+            new_lesson = review.split(
+                "MEMORY LESSON",
+                1
+            )[1].strip()
+
+            if new_lesson.startswith(":"):
+                new_lesson = new_lesson[1:].strip()
+
+        # -----------------------------------------
+        # 5. STORE NEW MEMORY IN HINDSIGHT
         # -----------------------------------------
 
         await hindsight.aretain(
@@ -167,14 +180,13 @@ Python code reviewed:
 
 Review:
 {review}
+
+Reusable lesson:
+{new_lesson}
 """
         )
 
-        # -----------------------------------------
-        # 4. RETURN RESULTS
-        # -----------------------------------------
-
-        return review, memories
+        return review, memories, memory_used, new_lesson
 
     finally:
 
@@ -186,6 +198,8 @@ def home():
 
     review = None
     memories = []
+    memory_used = False
+    new_lesson = ""
 
     if request.method == "POST":
 
@@ -193,7 +207,12 @@ def home():
 
         if code_to_review:
 
-            review, memories = asyncio.run(
+            (
+                review,
+                memories,
+                memory_used,
+                new_lesson
+            ) = asyncio.run(
                 review_with_hindsight(code_to_review)
             )
 
@@ -201,7 +220,9 @@ def home():
         "index.html",
         review=review,
         memories=memories,
-        memory_count=len(memories)
+        memory_count=len(memories),
+        memory_used=memory_used,
+        new_lesson=new_lesson
     )
 
 

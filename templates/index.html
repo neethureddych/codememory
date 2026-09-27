@@ -113,8 +113,6 @@
             background: #3b82f6;
         }
 
-        /* EXAMPLES */
-
         .examples {
             display: flex;
             gap: 10px;
@@ -142,36 +140,54 @@
             margin-bottom: 8px;
         }
 
-        .flow {
+        /* LEARNING JOURNEY */
+
+        .journey {
+            background: linear-gradient(135deg, #111827, #172554);
+            border: 1px solid #334155;
+        }
+
+        .journey h2 {
+            color: #bfdbfe;
+        }
+
+        .journey-flow {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 14px;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            align-items: center;
             margin-top: 25px;
         }
 
-        .flow-item {
-            padding: 20px;
+        .journey-step {
+            padding: 20px 12px;
             text-align: center;
             background: #0f172a;
-            border: 1px solid #1f2937;
+            border: 1px solid #334155;
             border-radius: 12px;
         }
 
-        .flow-number {
-            font-size: 25px;
+        .journey-icon {
+            font-size: 28px;
             margin-bottom: 10px;
         }
 
-        .flow-item strong {
+        .journey-step strong {
             display: block;
             color: white;
-            margin-bottom: 8px;
+            margin-bottom: 7px;
         }
 
-        .flow-item span {
+        .journey-step span {
             color: #9ca3af;
-            font-size: 14px;
-            line-height: 1.5;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        .journey-arrow {
+            text-align: center;
+            font-size: 25px;
+            color: #60a5fa;
         }
 
         /* MEMORY */
@@ -229,6 +245,46 @@
             line-height: 1.6;
         }
 
+        /* MEMORY INFLUENCE */
+
+        .influence-card {
+            background: linear-gradient(135deg, #1e1b4b, #172554);
+            border: 1px solid #6366f1;
+        }
+
+        .influence-card h2 {
+            color: #c4b5fd;
+        }
+
+        .influence-card p {
+            color: #ddd6fe;
+            line-height: 1.7;
+        }
+
+        .influence-flow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 25px;
+            text-align: center;
+        }
+
+        .influence-flow div {
+            padding: 15px;
+        }
+
+        .influence-flow strong {
+            display: block;
+            margin-top: 8px;
+            color: white;
+        }
+
+        .arrow {
+            font-size: 28px;
+            color: #818cf8;
+        }
+
         /* REVIEW */
 
         .review {
@@ -258,6 +314,17 @@
             line-height: 1.7;
         }
 
+        .learning .memory-box {
+            border-color: #059669;
+            border-left-color: #10b981;
+            background: #022c22;
+            color: #d1fae5;
+        }
+
+        .learning .memory-label {
+            color: #6ee7b7;
+        }
+
         .status {
             display: flex;
             gap: 10px;
@@ -281,23 +348,29 @@
             font-size: 14px;
         }
 
-        @media (max-width: 800px) {
-            .flow {
-                grid-template-columns: 1fr 1fr;
+        @media (max-width: 900px) {
+            .journey-flow {
+                grid-template-columns: 1fr;
             }
 
+            .journey-arrow {
+                transform: rotate(90deg);
+            }
+        }
+
+        @media (max-width: 800px) {
             .header h1 {
                 font-size: 32px;
             }
         }
 
-        @media (max-width: 500px) {
-            .flow {
-                grid-template-columns: 1fr;
+        @media (max-width: 600px) {
+            .influence-flow {
+                flex-direction: column;
             }
 
-            .card {
-                padding: 20px;
+            .arrow {
+                transform: rotate(90deg);
             }
         }
     </style>
@@ -321,7 +394,6 @@
 
 
     <div class="container">
-
 
         <!-- CODE INPUT -->
 
@@ -382,46 +454,66 @@
         </div>
 
 
-        <!-- HOW IT WORKS -->
+        <!-- LEARNING JOURNEY -->
+
+        <div class="card journey">
+
+            <h2>🧠 How CodeMemory Gets Smarter</h2>
+
+            <p class="description">
+                Every review creates reusable knowledge that can improve
+                future reviews.
+            </p>
+
+            <div class="journey-flow">
+
+                <div class="journey-step">
+                    <div class="journey-icon">💻</div>
+                    <strong>Review 1</strong>
+                    <span>Code is reviewed</span>
+                </div>
+
+                <div class="journey-arrow">→</div>
+
+                <div class="journey-step">
+                    <div class="journey-icon">📚</div>
+                    <strong>Learn</strong>
+                    <span>Lesson stored in Hindsight</span>
+                </div>
+
+                <div class="journey-arrow">→</div>
+
+                <div class="journey-step">
+                    <div class="journey-icon">🧠</div>
+                    <strong>Remember</strong>
+                    <span>Past lesson is recalled</span>
+                </div>
+
+                <div class="journey-arrow">→</div>
+
+                <div class="journey-step">
+                    <div class="journey-icon">🚀</div>
+                    <strong>Review 2</strong>
+                    <span>Future review uses the lesson</span>
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- INITIAL HOW IT WORKS -->
 
         {% if not review and not memories %}
 
         <div class="card">
 
-            <h2>⚡ How CodeMemory Learns</h2>
+            <h2>⚡ How CodeMemory Works</h2>
 
             <p class="description">
                 CodeMemory keeps useful lessons from previous reviews
                 and uses them when reviewing new code.
             </p>
-
-            <div class="flow">
-
-                <div class="flow-item">
-                    <div class="flow-number">💻</div>
-                    <strong>1. Submit</strong>
-                    <span>Submit your Python code.</span>
-                </div>
-
-                <div class="flow-item">
-                    <div class="flow-number">🧠</div>
-                    <strong>2. Recall</strong>
-                    <span>Hindsight retrieves relevant past lessons.</span>
-                </div>
-
-                <div class="flow-item">
-                    <div class="flow-number">🤖</div>
-                    <strong>3. Review</strong>
-                    <span>Groq reviews your code using those lessons.</span>
-                </div>
-
-                <div class="flow-item">
-                    <div class="flow-number">📚</div>
-                    <strong>4. Learn</strong>
-                    <span>The new lesson is stored in Hindsight.</span>
-                </div>
-
-            </div>
 
         </div>
 
@@ -479,6 +571,54 @@
         {% endif %}
 
 
+        <!-- MEMORY INFLUENCE -->
+
+        {% if review and memory_used %}
+
+        <div class="card influence-card">
+
+            <h2>⚡ Memory Influenced This Review</h2>
+
+            <p>
+                CodeMemory retrieved previous lessons from Hindsight
+                and those lessons influenced the AI's current review.
+            </p>
+
+            <div class="influence-flow">
+
+                <div>
+                    🧠
+                    <br>
+                    <strong>Past lesson</strong>
+                </div>
+
+                <div class="arrow">
+                    →
+                </div>
+
+                <div>
+                    🔎
+                    <br>
+                    <strong>Hindsight recall</strong>
+                </div>
+
+                <div class="arrow">
+                    →
+                </div>
+
+                <div>
+                    🤖
+                    <br>
+                    <strong>Better review</strong>
+                </div>
+
+            </div>
+
+        </div>
+
+        {% endif %}
+
+
         <!-- AI REVIEW -->
 
         {% if review %}
@@ -499,10 +639,23 @@
             <h2>📚 New Memory Stored</h2>
 
             <p>
-                This review has been stored in Hindsight.
-                CodeMemory can retrieve this lesson during future
-                code reviews.
+                CodeMemory extracted a reusable lesson from this review
+                and stored it in Hindsight for future code reviews.
             </p>
+
+            {% if new_lesson %}
+
+            <div class="memory-box">
+
+                <span class="memory-label">
+                    🧠 Lesson CodeMemory just learned
+                </span>
+
+                {{ new_lesson }}
+
+            </div>
+
+            {% endif %}
 
             <div class="status">
 
@@ -515,6 +668,10 @@
                 </div>
 
                 <div class="status-item">
+                    ✓ Memory Influenced Review
+                </div>
+
+                <div class="status-item">
                     ✓ New Lesson Stored
                 </div>
 
@@ -523,7 +680,6 @@
         </div>
 
         {% endif %}
-
 
     </div>
 
